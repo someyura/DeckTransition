@@ -36,6 +36,8 @@ final class DeckPresentingAnimationController: NSObject, UIViewControllerAnimate
         UIView.animate(
             withDuration: transitionDuration(using: transitionContext),
             delay: 0,
+            usingSpringWithDamping: 1.3,
+            initialSpringVelocity: 0,
             options: .curveEaseOut,
             animations: {
                 presentedViewController.view.frame = finalFrameForPresentedView
