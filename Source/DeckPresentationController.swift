@@ -46,6 +46,10 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
     private var presentCompletion: ((Bool) -> ())? = nil
     private var dismissAnimation: (() -> ())? = nil
     private var dismissCompletion: ((Bool) -> ())? = nil
+    
+    private let elasticThreshold: CGFloat = 400
+    private let dismissThreshold: CGFloat = 240
+    private let translationFactor: CGFloat = 1/3
 	
     // MARK: - Initializers
     
@@ -581,11 +585,14 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
             }
         
         case .ended:
-            UIView.animate(
-                withDuration: 0.25,
-                animations: {
+            let translation = gestureRecognizer.translation(in: presentedView)
+            if isSwipeToDismissAllowed() && translation.y > dismissThreshold {
+                presentedViewController.dismiss(animated: true, completion: nil)
+            } else {
+                UIView.animate(withDuration: 0.25, delay: 0, options: .curveEaseOut, animations: {
                     self.presentedView?.transform = .identity
-                })
+                }, completion: nil)
+            }
             scrollViewUpdater = nil
 
         default: break
@@ -607,12 +614,6 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
     /// - parameter translation: The translation of the user's pan gesture in
     ///   the container view in the vertical direction
     private func updatePresentedViewForTranslation(inVerticalDirection translation: CGFloat) {
-        
-        let elasticThreshold: CGFloat = 120
-        let dismissThreshold: CGFloat = 240
-        
-        let translationFactor: CGFloat = 1/2
-        
         /// Nothing happens if the pan gesture is performed from bottom
         /// to top i.e. if the translation is negative
         if translation >= 0 {
@@ -628,9 +629,9 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
             
             presentedView?.transform = CGAffineTransform(translationX: 0, y: translationForModal)
             
-            if translation >= dismissThreshold {
-                presentedViewController.dismiss(animated: true, completion: nil)
-            }
+//            if translation >= dismissThreshold {
+//                presentedViewController.dismiss(animated: true, completion: nil)
+//            }
         }
     }
     
