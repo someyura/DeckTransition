@@ -60,12 +60,20 @@ final class ScrollViewDetector {
         }
         
         for subview in viewController.view.subviews {
-            if let scrollView = subview as? UIScrollView {
+            if let scrollView = subview as? UIScrollView, scrollView.isTransitionScrollView {
                 return scrollView
             }
         }
         
         return nil
+    }
+    
+}
+
+extension UIScrollView {
+    
+    var isTransitionScrollView: Bool {
+        return false
     }
     
 }
