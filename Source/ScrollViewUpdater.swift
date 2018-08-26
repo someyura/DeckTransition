@@ -79,7 +79,7 @@ final class ScrollViewUpdater {
         if offset > 0 {
             scrollView.bounces = true
             isDismissEnabled = false
-        } else {
+        } else if scrollView.tag > 100 && scrollView.isScrollEnabled {
             if scrollView.isDecelerating {
                 rootView.transform = CGAffineTransform(translationX: 0, y: -offset)
                 scrollView.subviews.forEach {

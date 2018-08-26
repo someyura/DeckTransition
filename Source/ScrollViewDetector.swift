@@ -33,9 +33,9 @@ final class ScrollViewDetector {
     /// - Returns: The view controller whose `view` must be searched.
     private func getVisibleViewController(fromViewController viewController: UIViewController) -> UIViewController {
         guard let deckViewController = viewController as? DeckTransitionViewControllerProtocol,
-              let childViewController = deckViewController.childViewControllerForDeck as? UIViewController
-        else {
-            return viewController
+            let childViewController = deckViewController.childViewControllerForDeck as? UIViewController
+            else {
+                return viewController
         }
         
         return getVisibleViewController(fromViewController: childViewController)
@@ -51,7 +51,7 @@ final class ScrollViewDetector {
     ///   subviews, or nil if one isn't found.
     private func getScrollView(fromViewController viewController: UIViewController) -> UIScrollView? {
         if let deckViewController = viewController as? DeckTransitionViewControllerProtocol,
-           let scrollView = deckViewController.scrollViewForDeck {
+            let scrollView = deckViewController.scrollViewForDeck {
             return scrollView
         }
         
@@ -59,21 +59,41 @@ final class ScrollViewDetector {
             return scrollView
         }
         
-        for subview in viewController.view.subviews {
-            if let scrollView = subview as? UIScrollView, scrollView.isTransitionScrollView {
+        return checkView(view: viewController.view)
+        //        for subview in viewController.view.subviews {
+        //            if let scrollView = subview as? UIScrollView {
+        //                if scrollView.tag > 100 {
+        //                    let tag = scrollView.tag
+        //                    return scrollView
+        //                } else {
+        //                    for subview in scrollView.subviews {
+        //                        if let scrollView = subview as? UIScrollView {
+        //                            if scrollView.tag > 100 {
+        //                                let tag = scrollView.tag
+        //                                return scrollView
+        //                            } else {
+        //
+        //                            }
+        //                        }
+        //                    }
+        //                }
+        //            }
+        //        }
+        //
+        //        return nil
+    }
+    
+    func checkView(view: UIView) -> UIScrollView? {
+        for subview in view.subviews {
+            if let scrollView = subview as? UIScrollView, scrollView.tag > 100, scrollView.isScrollEnabled {
+                let tag = scrollView.tag
                 return scrollView
+            } else if let result = checkView(view: subview) {
+                return result
             }
         }
         
         return nil
-    }
-    
-}
-
-extension UIScrollView {
-    
-    var isTransitionScrollView: Bool {
-        return false
     }
     
 }

@@ -48,9 +48,9 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
     private var dismissCompletion: ((Bool) -> ())? = nil
     
     private let elasticThreshold: CGFloat = 400
-    private let dismissThreshold: CGFloat = 240
+    private let dismissThreshold: CGFloat = 140
     private let translationFactor: CGFloat = 1/3
-	
+    
     // MARK: - Initializers
     
     convenience init(presentedViewController: UIViewController,
@@ -71,7 +71,7 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
         
         NotificationCenter.default.addObserver(self, selector: #selector(updateForStatusBar), name: .UIApplicationDidChangeStatusBarFrame, object: nil)
     }
-
+    
     // MARK: - Public methods
     
     public func requestPresentedViewSnapshotUpdate() {
@@ -91,7 +91,7 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
         
         return 1 - (ManualLayout.presentingViewTopInset * 2 / containerView.frame.height)
     }
-	
+    
     override var frameOfPresentedViewInContainerView: CGRect {
         guard let containerView = containerView else {
             return .zero
@@ -104,8 +104,8 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
                       width: containerView.bounds.width,
                       height: containerView.bounds.height - yOffset)
     }
-	
-	// MARK: - Presentation
+    
+    // MARK: - Presentation
     
     override func presentationTransitionWillBegin() {
         guard let containerView = containerView, let window = containerView.window else {
@@ -127,6 +127,7 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
         
         /// The presented view's rounded view's frame is updated using KVO
         roundedViewForPresentedView.translatesAutoresizingMaskIntoConstraints = false
+        roundedViewForPresentedView.alpha = 0
         containerView.addSubview(roundedViewForPresentedView)
         setupPresentedViewKVO()
         
@@ -179,7 +180,7 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
             backgroundView.leftAnchor.constraint(equalTo: window.leftAnchor),
             backgroundView.rightAnchor.constraint(equalTo: window.rightAnchor),
             backgroundView.bottomAnchor.constraint(equalTo: window.bottomAnchor)
-        ])
+            ])
         
         /// A snapshot view is used to represent the hierarchy of cards in the
         /// case of recursive presentation
@@ -188,9 +189,9 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
         
         if presentingViewController.isPresentedWithDeck {
             guard let rootController = presentingViewController.presentingViewController,
-                  let snapshotView = rootController.view.snapshotView(afterScreenUpdates: false)
-            else {
-                return
+                let snapshotView = rootController.view.snapshotView(afterScreenUpdates: false)
+                else {
+                    return
             }
             
             containerView.insertSubview(snapshotView, aboveSubview: backgroundView)
@@ -222,7 +223,7 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
                 self.snapshotView?.transform = .identity
                 rootSnapshotView?.removeFromSuperview()
                 rootSnapshotRoundedView?.removeFromSuperview()
-            }
+        }
         )
     }
     
@@ -261,7 +262,7 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
             roundedViewForPresentingView.leftAnchor.constraint(equalTo: snapshotViewContainer.leftAnchor),
             roundedViewForPresentingView.rightAnchor.constraint(equalTo: snapshotViewContainer.rightAnchor),
             roundedViewForPresentingView.bottomAnchor.constraint(equalTo: snapshotViewContainer.bottomAnchor)
-        ])
+            ])
         
         if isSwipeToDismissGestureEnabled {
             pan = UIPanGestureRecognizer(target: self, action: #selector(handlePan))
@@ -270,10 +271,10 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
             pan!.cancelsTouchesInView = false
             presentedViewController.view.addGestureRecognizer(pan!)
         }
-
+        
         presentCompletion?(completed)
     }
-	
+    
     // MARK: - Layout update methods
     
     /// This method updates the aspect ratio of the snapshot view
@@ -322,7 +323,7 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
             }
         )
     }
-	
+    
     /// Method to handle updating the view when the status bar's height changes
     ///
     /// The `containerView`'s frame is always supposed to be the go 20 pixels
@@ -352,10 +353,10 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
             withDuration: 0.1,
             animations: {
                 containerView.frame.origin.y -= newHeight - currentHeight
-            }, completion: { [weak self] _ in
-                self?.presentingViewController.view.alpha = 1
-                containerView.frame = CGRect(x: 0, y: ManualLayout.containerViewTopInset, width: containerView.frame.width, height: newHeight)
-                self?.updateSnapshotView()
+        }, completion: { [weak self] _ in
+            self?.presentingViewController.view.alpha = 1
+            containerView.frame = CGRect(x: 0, y: ManualLayout.containerViewTopInset, width: containerView.frame.width, height: newHeight)
+            self?.updateSnapshotView()
             }
         )
     }
@@ -385,11 +386,11 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
             currentSnapshotView.leftAnchor.constraint(equalTo: snapshotViewContainer.leftAnchor),
             currentSnapshotView.rightAnchor.constraint(equalTo: snapshotViewContainer.rightAnchor),
             currentSnapshotView.bottomAnchor.constraint(equalTo: snapshotViewContainer.bottomAnchor)
-        ])
+            ])
         
         snapshotView = currentSnapshotView
-	}
-	
+    }
+    
     /// Thie method updates the aspect ratio and the height of the snapshot view
     /// used to represent the presenting view controller.
     ///
@@ -397,9 +398,9 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
     /// i.e. when just the status bar moves, nothing happens
     private func updateSnapshotViewAspectRatio() {
         guard let containerView = containerView,
-              snapshotViewContainer.translatesAutoresizingMaskIntoConstraints == false
-        else {
-            return
+            snapshotViewContainer.translatesAutoresizingMaskIntoConstraints == false
+            else {
+                return
         }
         
         snapshotViewTopConstraint?.isActive = false
@@ -492,9 +493,9 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
         
         if presentingViewController.isPresentedWithDeck {
             guard let rootController = presentingViewController.presentingViewController,
-                  let snapshotView = rootController.view.snapshotView(afterScreenUpdates: false)
-            else {
-                return
+                let snapshotView = rootController.view.snapshotView(afterScreenUpdates: false)
+                else {
+                    return
             }
             
             containerView.insertSubview(snapshotView, aboveSubview: backgroundView)
@@ -525,7 +526,7 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
             }, completion: { _ in
                 rootSnapshotView?.removeFromSuperview()
                 rootSnapshotRoundedView?.removeFromSuperview()
-            }
+        }
         )
     }
     
@@ -566,7 +567,7 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
         }
         
         switch gestureRecognizer.state {
-        
+            
         case .began:
             let detector = ScrollViewDetector(withViewController: presentedViewController)
             if let scrollView = detector.scrollView {
@@ -575,7 +576,7 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
                     scrollView: scrollView)
             }
             gestureRecognizer.setTranslation(CGPoint(x: 0, y: 0), in: containerView)
-        
+            
         case .changed:
             if isSwipeToDismissAllowed() {
                 let translation = gestureRecognizer.translation(in: presentedView)
@@ -583,7 +584,7 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
             } else {
                 gestureRecognizer.setTranslation(.zero, in: presentedView)
             }
-        
+            
         case .ended:
             let translation = gestureRecognizer.translation(in: presentedView)
             if isSwipeToDismissAllowed() && translation.y > dismissThreshold {
@@ -594,9 +595,9 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
                 }, completion: nil)
             }
             scrollViewUpdater = nil
-
+            
         default: break
-        
+            
         }
     }
     
@@ -629,9 +630,9 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
             
             presentedView?.transform = CGAffineTransform(translationX: 0, y: translationForModal)
             
-//            if translation >= dismissThreshold {
-//                presentedViewController.dismiss(animated: true, completion: nil)
-//            }
+            //            if translation >= dismissThreshold {
+            //                presentedViewController.dismiss(animated: true, completion: nil)
+            //            }
         }
     }
     

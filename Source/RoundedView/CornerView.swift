@@ -93,9 +93,9 @@ private final class CornerLayer: CAShapeLayer {
         /// https://stackoverflow.com/questions/14192816/create-a-custom-animatable-property
         
         guard event == CornerLayer.radiusKey,
-              let action = super.action(forKey: "backgroundColor") as? CAAnimation
-        else {
-            return super.action(forKey: event)
+            let action = super.action(forKey: "backgroundColor") as? CAAnimation
+            else {
+                return super.action(forKey: event)
         }
         
         let animation = CABasicAnimation(keyPath: CornerLayer.radiusKey)
