@@ -99,9 +99,9 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
         
         let yOffset = ManualLayout.presentingViewTopInset + Constants.insetForPresentedView
         
-        return CGRect(x: 0,
+        return CGRect(x: Constants.xOffset,
                       y: yOffset,
-                      width: containerView.bounds.width,
+                      width: containerView.bounds.width - Constants.xOffset * 2,
                       height: containerView.bounds.height - yOffset)
     }
     
@@ -156,12 +156,7 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
         /// Note: For some reason, this behaviour only happens in the
         /// presentation phase; constraints animate as expected on iOS <11 in
         /// the dismissal 🤷🏽‍♂️
-        let transformForSnapshotView = CGAffineTransform.identity
-            .translatedBy(x: 0, y: -snapshotViewContainer.frame.origin.y)
-            .translatedBy(x: 0, y: ManualLayout.presentingViewTopInset)
-            .translatedBy(x: 0, y: -snapshotViewContainer.frame.height / 2)
-            .scaledBy(x: scaleForPresentingView, y: scaleForPresentingView)
-            .translatedBy(x: 0, y: snapshotViewContainer.frame.height / 2)
+        let transformForSnapshotView = makeTransformForSnapshotView()
         
         /// For a recursive modal, the `presentingView` already has rounded
         /// corners so the animation must respect that
@@ -360,6 +355,28 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
             }
         )
     }
+
+    private func makeTransformForSnapshotView() -> CGAffineTransform {
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            return .identity
+        } else {
+            return CGAffineTransform.identity
+                .translatedBy(x: 0, y: -snapshotViewContainer.frame.origin.y)
+                .translatedBy(x: 0, y: ManualLayout.presentingViewTopInset)
+                .translatedBy(x: 0, y: -snapshotViewContainer.frame.height / 2)
+                .scaledBy(x: scaleForPresentingView, y: scaleForPresentingView)
+                .translatedBy(x: 0, y: snapshotViewContainer.frame.height / 2)
+        }
+    }
+
+    private func makeInitialDismissalTransform(frame initialFrame: CGRect) -> CGAffineTransform {
+        return CGAffineTransform.identity
+            .translatedBy(x: 0, y: -initialFrame.origin.y)
+            .translatedBy(x: 0, y: ManualLayout.presentingViewTopInset)
+            .translatedBy(x: 0, y: -initialFrame.height / 2)
+            .scaledBy(x: scaleForPresentingView, y: scaleForPresentingView)
+            .translatedBy(x: 0, y: initialFrame.height / 2)
+    }
     
     // MARK: - Snapshot view update methods
     
@@ -467,12 +484,7 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
             }
         }()
         
-        let initialTransform = CGAffineTransform.identity
-            .translatedBy(x: 0, y: -initialFrame.origin.y)
-            .translatedBy(x: 0, y: ManualLayout.presentingViewTopInset)
-            .translatedBy(x: 0, y: -initialFrame.height / 2)
-            .scaledBy(x: scaleForPresentingView, y: scaleForPresentingView)
-            .translatedBy(x: 0, y: initialFrame.height / 2)
+        let initialTransform = makeInitialDismissalTransform(frame: initialFrame)
         
         roundedViewForPresentingView.translatesAutoresizingMaskIntoConstraints = true
         roundedViewForPresentingView.frame = initialFrame
@@ -542,7 +554,10 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
         snapshotViewContainer.removeFromSuperview()
         roundedViewForPresentingView.removeFromSuperview()
         
-        let offscreenFrame = CGRect(x: 0, y: containerView.bounds.height, width: containerView.bounds.width, height: containerView.bounds.height)
+        let offscreenFrame = CGRect(x: 0,
+                                    y: containerView.bounds.height,
+                                    width: containerView.bounds.width,
+                                    height: containerView.bounds.height)
         presentedViewController.view.frame = offscreenFrame
         presentedViewController.view.transform = .identity
         

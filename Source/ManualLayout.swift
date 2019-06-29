@@ -21,6 +21,10 @@ final class ManualLayout {
     /// in-call status bars on portrait non-X iPhones inset the containerView
     /// by 20px
     class var containerViewTopInset: CGFloat {
+        guard UIDevice.current.userInterfaceIdiom != .pad else {
+            return 0
+        }
+
         let statusBarHeight = ManualLayout.statusBarHeight
         
         switch statusBarHeight {
@@ -45,6 +49,9 @@ final class ManualLayout {
     /// - On iPhone X in portrait, the inset is the full height of the status
     ///   bar
     class var presentingViewTopInset: CGFloat {
+        guard UIDevice.current.userInterfaceIdiom != .pad else {
+            return 0
+        }
         let statusBarHeight = ManualLayout.statusBarHeight
         
         switch statusBarHeight {
