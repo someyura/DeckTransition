@@ -26,7 +26,7 @@ final class ScrollViewUpdater {
     // MARK: - Private variables
     
     private weak var rootView: UIView?
-    private weak var scrollView: UIScrollView?
+    weak var scrollView: UIScrollView?
     private var observation: NSKeyValueObservation?
     
     // MARK: - Initializers
@@ -46,7 +46,7 @@ final class ScrollViewUpdater {
     // MARK: - Private methods
     
     private func scrollViewDidScroll() {
-        guard let rootView = rootView, let scrollView = scrollView else {
+        guard let rootView = rootView, let scrollView = scrollView, scrollView.tag < 200 else {
             return
         }
         
