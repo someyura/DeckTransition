@@ -652,7 +652,21 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
     }
     
     // MARK: - UIGestureRecognizerDelegate methods
-    
+
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        let location = gestureRecognizer.location(in: presentedViewController.view)
+        if let view = presentedViewController.view.hitTest(location, with: nil) {
+            if let textView = view as? UITextView {
+                return textView.selectedRange.length == 0
+            } else {
+                let viewClassString = NSStringFromClass(view.classForCoder)
+                return ["UITextRangeView"].contains(viewClassString) == false
+            }
+        } else {
+            return true
+        }
+    }
+
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         guard gestureRecognizer.isEqual(pan) else {
             return false
